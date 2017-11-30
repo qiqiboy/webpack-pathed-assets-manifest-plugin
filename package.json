@@ -1,0 +1,19 @@
+{
+  "name": "webpack-pathed-assets-manifest-plugin",
+  "version": "1.0.0",
+  "description": "Create manifest file use their pathname",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://qiqiboy@github.com/qiqiboy/webpack-pathed-assets-manifest-plugin.git"
+  },
+  "author": "qiqiboy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qiqiboy/webpack-pathed-assets-manifest-plugin/issues"
+  },
+  "homepage": "https://github.com/qiqiboy/webpack-pathed-assets-manifest-plugin#readme"
+}
