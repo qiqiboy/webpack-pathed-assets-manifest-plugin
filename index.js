@@ -1,5 +1,5 @@
 function ExportPathedManifest(options) {
-    this.options = extend(
+    this.options = Object.assign(
         {
             filename: 'pathed.manifest.json',
             map: null,
@@ -53,21 +53,5 @@ ExportPathedManifest.prototype.apply = function(compiler) {
         compileCallback();
     });
 };
-
-function extend(base) {
-    var i = 1;
-    var len = arguments.length;
-
-    for (; i < len; i++) {
-        var obj = arguments[i];
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                base[key] = obj[key];
-            }
-        }
-    }
-
-    return base;
-}
 
 module.exports = ExportPathedManifest;
