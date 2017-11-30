@@ -31,10 +31,14 @@ ExportPathedManifest.prototype.apply = function(compiler) {
             manifestFiles = manifestFiles.map(options.map);
         }
 
-        var manifest = manifestFiles.reduce(function(manifest, item) {
-            manifest[item.pathname] = item.filename;
-            return manifest;
-        }, {});
+        var manifest = manifestFiles
+            .sort(function(a, b) {
+                return a.pathname > b.pathname ? 1 : -1;
+            })
+            .reduce(function(manifest, item) {
+                manifest[item.pathname] = item.filename;
+                return manifest;
+            }, {});
         var manifestJson = JSON.stringify(manifest, '\n', 2);
 
         compilation.assets[options.filename] = {
