@@ -1,7 +1,7 @@
 function ExportPathedManifest(options) {
     this.options = extend(
         {
-            filename: 'static.manifest.json',
+            filename: 'pathed.manifest.json',
             map: null,
             filter: null
         },
