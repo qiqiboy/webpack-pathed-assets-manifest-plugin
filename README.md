@@ -6,35 +6,42 @@
 
 ### 解决的问题
 
-我们使用 `webpack-manifest-plugin` 这种插件，生成的清单文件，类似：
+如下文件结构，模块 A 和 B 下的出现了名称同为 logo.png 的不同图片文件：
 
-```json
-{
-    "logo.png": "logo.xxxxxx.png",
-    "title.png": "title.xxxxxx.png"
-}
-```
-
-这种存在的问题是，不同路径下同名文件会相互覆盖，导致生成的清单文件中缺少重复的项目。
-如下文件结构，模块A和B下的同名logo.png在生成的清单文件中只会出现一个logo.png。
 ```
     app
         A
             index.js
             logo.png
+            title.png
         B
             index.js
             logo.png
 ```
 
-通过本插件，可以生成：
+我们使用 `webpack-manifest-plugin` 这种插件，生成的清单文件，会类似：
 
 ```json
 {
-    "logos/logo.png": "logo.xxxxxx.png",
-    "about/titles/title.png": "title.xxxxxx.png"
+    "logo.png": "logo.dyui4ae3.png",
+    "title.png": "title.ce678r33.png"
 }
 ```
+
+很明显可以看出，少了个 logo.png 文件的记录。也就是说，不同模块下的同名文件，在清单文件中会相互覆盖，导致生成的清单文件有
+丢失文件记录。
+
+而通过本插件，可以生成：
+
+```json
+{
+    "app/A/logo.png": "logo.dyui4ae3.png",
+    "app/A/title.png": "title.ce678r33.png",
+    "app/B/logo.png": "logo.udjo833e.png"
+}
+```
+
+完美保留了所有的文件索引。
 
 ### 安装
 
