@@ -9,22 +9,22 @@
 如下文件结构，模块 A 和 B 下的出现了名称同为 logo.png 的不同图片文件：
 
 ```
-    app
-        A
-            index.js
-            logo.png
-            title.png
-        B
-            index.js
-            logo.png
+    app/
+      A/
+        index.js
+        logo.png
+        title.png
+      B/
+        index.js
+        logo.png
 ```
 
 我们使用 `webpack-manifest-plugin` 这种插件，生成的清单文件，会类似：
 
 ```json
 {
-    "logo.png": "logo.dyui4ae3.png",
-    "title.png": "title.ce678r33.png"
+    "logo.png": "logo.d5ae6b8d.png",
+    "title.png": "title.531a2154.png"
 }
 ```
 
@@ -35,9 +35,9 @@
 
 ```json
 {
-    "app/A/logo.png": "logo.dyui4ae3.png",
-    "app/A/title.png": "title.ce678r33.png",
-    "app/B/logo.png": "logo.udjo833e.png"
+    "app/A/logo.png": "logo.d5ae6b8d.png",
+    "app/A/title.png": "title.531a2154.png",
+    "app/B/logo.png": "logo.423a075.png"
 }
 ```
 
