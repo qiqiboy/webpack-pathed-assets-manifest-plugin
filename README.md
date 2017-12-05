@@ -10,18 +10,18 @@
 
 ```
     app/
-      A/
-        index.js
-        logo.png
-        title.png
-      B/
-        index.js
-        logo.png
+    |- /A
+      |- index.js
+      |- logo.png
+      |- title.png
+    |- /B
+      |- index.js
+      |- logo.png
 ```
 
 我们使用 `webpack-manifest-plugin` 这种插件，生成的清单文件，会类似：
 
-```json
+```js
 {
     "logo.png": "logo.d5ae6b8d.png",
     "title.png": "title.531a2154.png"
@@ -33,7 +33,7 @@
 
 而通过本插件，可以生成：
 
-```json
+```js
 {
     "app/A/logo.png": "logo.d5ae6b8d.png",
     "app/A/title.png": "title.531a2154.png",
