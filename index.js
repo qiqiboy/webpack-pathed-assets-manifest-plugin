@@ -1,3 +1,5 @@
+const path = require('path');
+
 function ExportPathedManifest(options) {
     this.options = Object.assign(
         {
@@ -7,6 +9,14 @@ function ExportPathedManifest(options) {
         },
         options || {}
     );
+}
+
+function transform(filename) {
+    const pips = filename.split('.');
+
+    pips.splice(-2, 1);
+
+    return pips.join('.');
 }
 
 ExportPathedManifest.prototype.apply = function(compiler) {
@@ -23,10 +33,15 @@ ExportPathedManifest.prototype.apply = function(compiler) {
         compiler.hooks.webpackManifestPluginAfterEmit = new SyncWaterfallHook(['manifest']);
 
         compiler.hooks.compilation.tap(pluginOptions, function(compilation) {
-            compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename) {
+            compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename, c) {
+                let fileDependencies = Array.from(module.buildInfo.fileDependencies);
+                let mayFile = fileDependencies.find(function(file) {
+                    return path.basename(file) === transform(path.basename(filename));
+                });
+
                 manifestFiles.push({
                     filename: filename,
-                    pathname: Array.from(module.buildInfo.fileDependencies).slice(-1)[0] || module.userRequest
+                    pathname: mayFile || module.userRequest
                 });
             });
         });
