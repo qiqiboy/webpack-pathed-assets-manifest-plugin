@@ -26,7 +26,7 @@ ExportPathedManifest.prototype.apply = function(compiler) {
             compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename) {
                 manifestFiles.push({
                     filename: filename,
-                    pathname: module.userRequest
+                    pathname: Array.from(module.buildInfo.fileDependencies).slice(-1)[0] || module.userRequest
                 });
             });
         });
