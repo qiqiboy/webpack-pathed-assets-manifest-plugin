@@ -10,48 +10,62 @@ function ExportPathedManifest(options) {
 }
 
 ExportPathedManifest.prototype.apply = function(compiler) {
-    var options = this.options;
-    var manifestFiles = [];
+    let options = this.options;
+    let manifestFiles = [];
 
-    compiler.plugin('compilation', function(compilation) {
-        compilation.plugin('module-asset', function(module, filename) {
-            manifestFiles.push({
-                filename: filename,
-                pathname: module.userRequest
+    if (compiler.hooks) {
+        const pluginOptions = {
+            name: 'PathedManifestPlugin',
+            stage: Infinity
+        };
+        const SyncWaterfallHook = require('tapable').SyncWaterfallHook;
+
+        compiler.hooks.webpackManifestPluginAfterEmit = new SyncWaterfallHook(['pathed-manifest']);
+
+        compiler.hooks.compilation.tap(pluginOptions, function(compilation) {
+            compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename) {
+                manifestFiles.push({
+                    filename: filename,
+                    pathname: module.userRequest
+                });
             });
         });
-    });
 
-    compiler.plugin('emit', function(compilation, compileCallback) {
-        if (options.filter) {
-            manifestFiles = manifestFiles.filter(options.filter);
-        }
-
-        if (options.map) {
-            manifestFiles = manifestFiles.map(options.map);
-        }
-
-        var manifest = manifestFiles
-            .sort(function(a, b) {
-                return a.pathname > b.pathname ? 1 : -1;
-            })
-            .reduce(function(manifest, item) {
-                manifest[item.pathname] = item.filename;
-                return manifest;
-            }, {});
-        var manifestJson = JSON.stringify(manifest, '\n', 2);
-
-        compilation.assets[options.filename] = {
-            source: function() {
-                return manifestJson;
-            },
-            size: function() {
-                return manifestJson.length;
+        compiler.hooks.emit.tap(pluginOptions, function(compilation, compileCallback) {
+            if (options.filter) {
+                manifestFiles = manifestFiles.filter(options.filter);
             }
-        };
 
-        compileCallback();
-    });
+            if (options.map) {
+                manifestFiles = manifestFiles.map(options.map);
+            }
+
+            const manifest = manifestFiles
+                .sort(function(a, b) {
+                    return a.pathname > b.pathname ? 1 : -1;
+                })
+                .reduce(function(manifest, item) {
+                    manifest[item.pathname] = item.filename;
+                    return manifest;
+                }, {});
+            const manifestJson = JSON.stringify(manifest, '\n', 2);
+
+            compilation.assets[options.filename] = {
+                source: function() {
+                    return manifestJson;
+                },
+                size: function() {
+                    return manifestJson.length;
+                }
+            };
+
+            compiler.hooks.webpackManifestPluginAfterEmit.call(manifest);
+        });
+    } else {
+        console.log(
+            'The current version is only compatible with webpack@4. Please upgrade your webpack or use the < 2.0.0 version.'
+        );
+    }
 };
 
 module.exports = ExportPathedManifest;
