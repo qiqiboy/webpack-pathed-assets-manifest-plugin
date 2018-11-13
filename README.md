@@ -1,5 +1,7 @@
 # webpack-pathed-assets-manifest-plugin
 
+> `v2.0`及以上版本仅支持`webpack@4`。如果你在使用`webpack@3`，请使用 1.x 版本代替：`npm install webpack-pathed-assets-manifest-plugin@1`
+
 创建资源清单文件，使用他们的路径当作 key，以方便 server-render 项目映射资源文件路径到打包后的文件。
 
 注：该插件无法替代 webpack-manifest-plugin。它仅仅处理入口文件中 require 的资源文件，例如图片等。
@@ -28,8 +30,7 @@
 }
 ```
 
-很明显可以看出，少了个 logo.png 文件的记录。也就是说，不同模块下的同名文件，在清单文件中会相互覆盖，导致生成的清单文件有
-丢失文件记录。
+很明显可以看出，少了个 logo.png 文件的记录。也就是说，不同模块下的同名文件，在清单文件中会相互覆盖，导致生成的清单文件有丢失文件记录。
 
 而通过本插件，可以生成：
 

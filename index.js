@@ -20,7 +20,7 @@ ExportPathedManifest.prototype.apply = function(compiler) {
         };
         const SyncWaterfallHook = require('tapable').SyncWaterfallHook;
 
-        compiler.hooks.webpackManifestPluginAfterEmit = new SyncWaterfallHook(['pathed-manifest']);
+        compiler.hooks.webpackManifestPluginAfterEmit = new SyncWaterfallHook(['manifest']);
 
         compiler.hooks.compilation.tap(pluginOptions, function(compilation) {
             compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename) {
