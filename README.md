@@ -61,7 +61,8 @@ module.exports = {
         new PathedManifestPlugin({
             filename: 'pathed.manifest.json',
             map: null, // 可以传function，自定义filename和pathname，默认pathname为绝对路径
-            filter: null // 可以传function，自定义过滤的文件
+            filter: null, // 可以传function，自定义过滤的文件
+            assetFilename: '[name].[hash].[ext]' // 静态文件的命名模版，默认为文件后缀前是hash值，如果你的文件命名规则不是这样，可以修改该模板。例如：asset-[name].[hash:8].[ext]
         })
     ]
 };

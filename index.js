@@ -5,18 +5,24 @@ function ExportPathedManifest(options) {
         {
             filename: 'pathed.manifest.json',
             map: null,
-            filter: null
+            filter: null,
+            assetFilename: '[name].[hash].[ext]'
         },
         options || {}
     );
 }
 
-function transform(filename) {
-    const pips = filename.split('.');
+function transform(filename, template) {
+    const templateArr = template.split('.');
+    const filenameArr = filename.split('.');
 
-    pips.splice(-2, 1);
+    templateArr.forEach((holder, index) => {
+        if (/\[(?:hash|chunkhash)(?::\d)?\]/.test(holder)) {
+            filenameArr.splice(index, 1);
+        }
+    });
 
-    return pips.join('.');
+    return filenameArr.join('.');
 }
 
 ExportPathedManifest.prototype.apply = function(compiler) {
@@ -28,15 +34,12 @@ ExportPathedManifest.prototype.apply = function(compiler) {
             name: 'PathedManifestPlugin',
             stage: Infinity
         };
-        const SyncWaterfallHook = require('tapable').SyncWaterfallHook;
-
-        compiler.hooks.webpackManifestPluginAfterEmit = new SyncWaterfallHook(['manifest']);
 
         compiler.hooks.compilation.tap(pluginOptions, function(compilation) {
             compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename, c) {
                 let fileDependencies = Array.from(module.buildInfo.fileDependencies);
                 let mayFile = fileDependencies.find(function(file) {
-                    return path.basename(file) === transform(path.basename(filename));
+                    return path.basename(file) === transform(path.basename(filename), options.assetFilename);
                 });
 
                 manifestFiles.push({
@@ -46,7 +49,7 @@ ExportPathedManifest.prototype.apply = function(compiler) {
             });
         });
 
-        compiler.hooks.emit.tap(pluginOptions, function(compilation, compileCallback) {
+        compiler.hooks.emit.tapPromise(pluginOptions, function(compilation) {
             if (options.filter) {
                 manifestFiles = manifestFiles.filter(options.filter);
             }
@@ -74,7 +77,7 @@ ExportPathedManifest.prototype.apply = function(compiler) {
                 }
             };
 
-            compiler.hooks.webpackManifestPluginAfterEmit.call(manifest);
+            return Promise.resolve();
         });
     } else {
         console.log(
