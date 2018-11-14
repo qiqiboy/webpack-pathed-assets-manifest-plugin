@@ -27,8 +27,6 @@ ExportPathedManifest.prototype.apply = function(compiler) {
     let assetFilenamePattern = this.assetFilenamePattern;
     let manifestFiles = [];
 
-    console.log(this.assetFilenamePattern)
-
     if (compiler.hooks) {
         const pluginOptions = {
             name: 'PathedManifestPlugin',
