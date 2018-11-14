@@ -10,24 +10,24 @@ function ExportPathedManifest(options) {
         },
         options || {}
     );
-}
 
-function transform(filename, template) {
-    const templateArr = template.split('.');
-    const filenameArr = filename.split('.');
-
-    templateArr.forEach((holder, index) => {
-        if (/\[(?:hash|chunkhash)(?::\d)?\]/.test(holder)) {
-            filenameArr.splice(index, 1);
-        }
-    });
-
-    return filenameArr.join('.');
+    this.assetFilenamePattern = new RegExp(
+        '^' +
+            this.options.assetFilename
+                .replace(/([\\.])/g, '\\$1')
+                .replace(/\[(?:name|id)\]/, '(\\w+)')
+                .replace(/\\.(?:\[?\w+\]?$)/, '(\\.\\w+)')
+                .replace(/\[[\w:]+\]/g, '.+') +
+            '$'
+    );
 }
 
 ExportPathedManifest.prototype.apply = function(compiler) {
     let options = this.options;
+    let assetFilenamePattern = this.assetFilenamePattern;
     let manifestFiles = [];
+
+    console.log(this.assetFilenamePattern)
 
     if (compiler.hooks) {
         const pluginOptions = {
@@ -37,9 +37,12 @@ ExportPathedManifest.prototype.apply = function(compiler) {
 
         compiler.hooks.compilation.tap(pluginOptions, function(compilation) {
             compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename, c) {
+                let beforeHashName = path.basename(filename).replace(assetFilenamePattern, function(fullname, name, ext) {
+                    return name + ext;
+                });
                 let fileDependencies = Array.from(module.buildInfo.fileDependencies);
                 let mayFile = fileDependencies.find(function(file) {
-                    return path.basename(file) === transform(path.basename(filename), options.assetFilename);
+                    return path.basename(file) === beforeHashName;
                 });
 
                 manifestFiles.push({
