@@ -15,7 +15,7 @@ function ExportPathedManifest(options) {
         '^' +
             this.options.assetFilename
                 .replace(/([\\.])/g, '\\$1')
-                .replace(/\[(?:name|id)\]/, '(\\w+)')
+                .replace(/\[(?:name|id)\]/, '(.+)')
                 .replace(/\\.(?:\[?\w+\]?$)/, '(\\.\\w+)')
                 .replace(/\[[\w:]+\]/g, '.+') +
             '$'
