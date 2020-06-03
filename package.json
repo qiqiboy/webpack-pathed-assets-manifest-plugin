@@ -1,6 +1,6 @@
 {
   "name": "webpack-pathed-assets-manifest-plugin",
-  "version": "2.0.7",
+  "version": "3.0.0",
   "description": "Create manifest file use their pathname",
   "main": "index.js",
   "scripts": {
