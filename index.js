@@ -52,16 +52,18 @@ ExportPathedManifest.prototype.apply = function (compiler) {
             });
 
             compilation.hooks.chunkAsset.tap(pluginOptions, function (chunk, filename, c) {
-                let beforeHashName = path
-                    .basename(filename)
-                    .replace(assetFilenamePattern, function (fullname, name, ext) {
-                        return name + ext;
-                    });
+                if (filename !== '*') {
+                    let beforeHashName = path
+                        .basename(filename)
+                        .replace(assetFilenamePattern, function (fullname, name, ext) {
+                            return name + ext;
+                        });
 
-                manifestFiles.push({
-                    filename: filename,
-                    pathname: path.join(path.dirname(filename), beforeHashName)
-                });
+                    manifestFiles.push({
+                        filename: filename,
+                        pathname: path.join(path.dirname(filename), beforeHashName)
+                    });
+                }
             });
         });
 
