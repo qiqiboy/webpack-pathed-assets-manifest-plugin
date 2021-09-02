@@ -60,25 +60,10 @@ module.exports = {
     plugins: [
         new PathedManifestPlugin({
             filename: 'pathed.manifest.json',
-            map: null, // 可以传function，自定义filename和pathname，默认pathname为绝对路径
+            map: null, // 可以传function，自定义filename和pathname，默认pathname为相对项目根目录的相对路径
             filter: null, // 可以传function，自定义过滤的文件
             assetFilename: '[name].[hash].[ext]' // 静态文件的命名模版，默认为文件后缀前是hash值，如果你的文件命名规则不是这样，可以修改该模板。例如：asset-[name].[hash:8].[ext]
         })
     ]
 };
-```
-
-默认生成的清单文件，是以绝对路径作为 key。推荐使用以下配置：
-
-```js
-var path = require('path');
-
-new PathedManifestPlugin({
-    map: function(file) {
-        return {
-            filename: file.filename,
-            pathname: path.relative(root /* your project root */, file.pathname)
-        };
-    }
-});
 ```

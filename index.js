@@ -23,10 +23,9 @@ function ExportPathedManifest(options) {
     );
 }
 
-ExportPathedManifest.prototype.apply = function(compiler) {
+ExportPathedManifest.prototype.apply = function (compiler) {
     let options = this.options;
     let assetFilenamePattern = this.assetFilenamePattern;
-    let manifestFiles = [];
 
     if (compiler.hooks) {
         const pluginOptions = {
@@ -34,40 +33,24 @@ ExportPathedManifest.prototype.apply = function(compiler) {
             stage: Infinity
         };
 
-        compiler.hooks.compilation.tap(pluginOptions, function(compilation) {
-            compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename) {
-                let beforeHashName = path
-                    .basename(filename)
-                    .replace(assetFilenamePattern, function(fullname, name, ext) {
-                        return name + ext;
-                    });
-                let fileDependencies = Array.from(module.buildInfo.fileDependencies);
-                let mayFile = fileDependencies.find(function(file) {
-                    return path.basename(file) === beforeHashName;
-                });
+        compiler.hooks.thisCompilation.tap(pluginOptions, function (compilation) {
+            compilation.hooks.processAssets.tap(pluginOptions, () => {
+                let manifestFiles = [];
 
-                manifestFiles.push({
-                    filename: filename,
-                    pathname: mayFile || module.userRequest
-                });
-            });
-
-            compilation.hooks.chunkAsset.tap(pluginOptions, function(chunk, filename) {
-                if (filename !== '*') {
-                    let beforeHashName = path
-                        .basename(filename)
-                        .replace(assetFilenamePattern, function(fullname, name, ext) {
-                            return name + ext;
-                        });
-
+                for (let [key, value] of compilation.assetsInfo) {
                     manifestFiles.push({
-                        filename: filename,
-                        pathname: path.join(path.dirname(filename), beforeHashName)
+                        filename: key,
+                        pathname:
+                            value.sourceFilename ||
+                            path.join(
+                                path.dirname(key),
+                                path.basename(key).replace(assetFilenamePattern, function (fullname, name, ext) {
+                                    return name + ext;
+                                })
+                            )
                     });
                 }
-            });
 
-            compilation.hooks.processAssets.tap(pluginOptions, () => {
                 if (options.filter) {
                     manifestFiles = manifestFiles.filter(options.filter);
                 }
@@ -77,10 +60,10 @@ ExportPathedManifest.prototype.apply = function(compiler) {
                 }
 
                 const manifest = manifestFiles
-                    .sort(function(a, b) {
+                    .sort(function (a, b) {
                         return a.pathname > b.pathname ? 1 : -1;
                     })
-                    .reduce(function(manifest, item) {
+                    .reduce(function (manifest, item) {
                         manifest[item.pathname] = item.filename;
 
                         return manifest;
@@ -88,13 +71,11 @@ ExportPathedManifest.prototype.apply = function(compiler) {
                 const manifestJson = JSON.stringify(manifest, '\n', 2);
 
                 compilation.emitAsset(options.filename, new webpack.sources.RawSource(manifestJson, true));
-
-                manifestFiles.length = 0;
             });
         });
     } else {
         console.log(
-            'The current version is only compatible with webpack@4. Please upgrade your webpack or use the < 2.0.0 version.'
+            'The current version is only compatible with webpack@>=4. Please upgrade your webpack or use the < 2.0.0 version.'
         );
     }
 };
