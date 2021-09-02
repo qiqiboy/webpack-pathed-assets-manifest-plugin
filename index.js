@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 function ExportPathedManifest(options) {
     this.options = Object.assign(
@@ -22,7 +23,7 @@ function ExportPathedManifest(options) {
     );
 }
 
-ExportPathedManifest.prototype.apply = function (compiler) {
+ExportPathedManifest.prototype.apply = function(compiler) {
     let options = this.options;
     let assetFilenamePattern = this.assetFilenamePattern;
     let manifestFiles = [];
@@ -33,15 +34,15 @@ ExportPathedManifest.prototype.apply = function (compiler) {
             stage: Infinity
         };
 
-        compiler.hooks.compilation.tap(pluginOptions, function (compilation) {
-            compilation.hooks.moduleAsset.tap(pluginOptions, function (module, filename, c) {
+        compiler.hooks.compilation.tap(pluginOptions, function(compilation) {
+            compilation.hooks.moduleAsset.tap(pluginOptions, function(module, filename) {
                 let beforeHashName = path
                     .basename(filename)
-                    .replace(assetFilenamePattern, function (fullname, name, ext) {
+                    .replace(assetFilenamePattern, function(fullname, name, ext) {
                         return name + ext;
                     });
                 let fileDependencies = Array.from(module.buildInfo.fileDependencies);
-                let mayFile = fileDependencies.find(function (file) {
+                let mayFile = fileDependencies.find(function(file) {
                     return path.basename(file) === beforeHashName;
                 });
 
@@ -51,11 +52,11 @@ ExportPathedManifest.prototype.apply = function (compiler) {
                 });
             });
 
-            compilation.hooks.chunkAsset.tap(pluginOptions, function (chunk, filename, c) {
+            compilation.hooks.chunkAsset.tap(pluginOptions, function(chunk, filename) {
                 if (filename !== '*') {
                     let beforeHashName = path
                         .basename(filename)
-                        .replace(assetFilenamePattern, function (fullname, name, ext) {
+                        .replace(assetFilenamePattern, function(fullname, name, ext) {
                             return name + ext;
                         });
 
@@ -65,39 +66,31 @@ ExportPathedManifest.prototype.apply = function (compiler) {
                     });
                 }
             });
-        });
 
-        compiler.hooks.emit.tapPromise(pluginOptions, function (compilation) {
-            if (options.filter) {
-                manifestFiles = manifestFiles.filter(options.filter);
-            }
-
-            if (options.map) {
-                manifestFiles = manifestFiles.map(options.map);
-            }
-
-            const manifest = manifestFiles
-                .sort(function (a, b) {
-                    return a.pathname > b.pathname ? 1 : -1;
-                })
-                .reduce(function (manifest, item) {
-                    manifest[item.pathname] = item.filename;
-                    return manifest;
-                }, {});
-            const manifestJson = JSON.stringify(manifest, '\n', 2);
-
-            compilation.assets[options.filename] = {
-                source: function () {
-                    return manifestJson;
-                },
-                size: function () {
-                    return manifestJson.length;
+            compilation.hooks.processAssets.tap(pluginOptions, () => {
+                if (options.filter) {
+                    manifestFiles = manifestFiles.filter(options.filter);
                 }
-            };
 
-            manifestFiles.length = 0;
+                if (options.map) {
+                    manifestFiles = manifestFiles.map(options.map);
+                }
 
-            return Promise.resolve();
+                const manifest = manifestFiles
+                    .sort(function(a, b) {
+                        return a.pathname > b.pathname ? 1 : -1;
+                    })
+                    .reduce(function(manifest, item) {
+                        manifest[item.pathname] = item.filename;
+
+                        return manifest;
+                    }, {});
+                const manifestJson = JSON.stringify(manifest, '\n', 2);
+
+                compilation.emitAsset(options.filename, new webpack.sources.RawSource(manifestJson, true));
+
+                manifestFiles.length = 0;
+            });
         });
     } else {
         console.log(
